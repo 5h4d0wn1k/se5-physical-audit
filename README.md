@@ -1,100 +1,77 @@
-# SE5 — Physical Security Audit Kit
+# SE5 — Physical Audit Lab Kit
 
-Authorized physical-security assessment toolkit for asset inventory, tailgating simulation, and badge-cloning risk analysis.
-
-## Overview
-
-- Builds an inventory of physical assets and access points with clearance levels
-- Tracks lock-pick / bypass qualification for authorized testing technicians
-- Generates tailgating-simulation checklists with result logging templates
-- Analyzes badge-cloning risk from supplied byte samples (EDGE, HID PROX, Awid formats)
-- Produces a structured physical-security audit report
-- Heavy legal disclaimer — authorized testing only
-- Zero dependencies — pure Python standard library
+Authorized physical-security assessment **scoping / checklist / reporting** tool.
+Plan tailgating-test rounds, print defensive badge-check materials, and build audit
+reports — all locked behind a mandatory authorization record. No forced-entry, lock
+bypass, or break-in logic exists in this kit.
 
 ## Features
 
-- **Asset & Access-Point Inventory**: Tag, type, location, owner, classification, lock type, clearance
-- **Lock-Out Qualification Tracking**: Per-technician, per-lock-model status
-- **Tailgating Simulator Checklist**: 10-step, multi-round simulation plan with grading criteria
-- **Badge Risk Engine**: Parses raw byte samples into manufacturer + UID components; risk classification
-- **Audit Report Generator**: Structured, sectioned report output
-- **Embedded demo** — runs fully offline on sample data
-
-## Installation
-
-No external dependencies required — uses Python standard library only.
-
-```bash
-python3 firmware/physical_audit.py
-```
-
-## Usage
-
-```python
-from firmware.physical_audit import (AssetInventory, TailgatingSimulation,
-                                     BadgeRisk, AuditReport)
-
-report = AuditReport(site="ACME HQ", date="2026-09-04")
-report.add_section("Findings", "Example finding text")
-print(report.render())
-
-risk = BadgeRisk("EDGE")
-parsed = risk.parse_raw(base64_bytes)
-print(risk.risk_assessment())
-```
-
-## Example Output
-
-```
-ASSET & ACCESS-POINT INVENTORY — Site
-Assets: 2
-  [A-01] Server Rack @ Data Center 1 owner=IT Ops (confidential)
-  [A-02] Workstation @ Engineering Floor owner=Eng (internal)
-Access Points: 1
-  [D-01] Main Entrance lock=magnetic clearance=low
-
-BADGE-CLONING RISK ASSESSMENT (EDGE sample)
-  [EDGE]      UID=3a4f9b21 risk=HIGH  — Short UID space...
-  [HID PROX]  UID=88c1e3a7 risk=HIGH  — Short UID space...
-  [Awid]      UID=6d5f0a3c risk=MEDIUM — Moderate UID space...
-```
+- **AuthorizationRecord (mandatory)** — site (`.example` only), engaging org,
+  named testers, in-scope doors/areas, test window, legal review, consent flag.
+  Nothing is generated without a complete record.
+- **Synthetic asset inventory** — assets and access points with clearance levels.
+- **TailgatingTestPlan** — checklist rounds with explicit prohibited techniques.
+- **BadgeCheckMats** — defensive badge-verification steps (escort policy, validation).
+- **AuditReport** — Markdown + JSON reports with a mandatory authorization block.
 
 ## IMPORTANT: Read before use.
 
-This toolkit is provided **exclusively** for authorized physical-security assessments. Conducting physical-security tests without written authorization is illegal and dangerous.
+Provided **exclusively** for authorized physical-security assessments. Testing
+without written authorization is illegal and dangerous.
 
 ### Authorization Requirements
-
-You require a signed, scoped testing agreement with the facility owner, plus approval from security leadership and legal counsel, before conducting any physical assessment. The scope must explicitly include which doors, locks, badge systems, and areas may be tested, and featured inspection time windows.
+- Signed, scoped testing agreement with the facility owner, security leadership,
+  and legal counsel, covering which doors/locks/areas and time windows may be tested.
+- `--target-org` is locked to `OWN`; site names must be synthetic (`.example`).
+- `consent_on_file` must be `true` in the authorization record.
+- Requests to remove these safeguards (or add bypass/break-in logic) will be refused.
 
 ### Legal Framework
-
-Unauthorized entry is governed by **CFAA (18 U.S.C. § 1030)** and **trespass law**, state and local **burglary and criminal trespass statutes**, and the **EU General Data Protection Regulation (GDPR)** where PII is involved. Physical-security incidents can result in arrest, prosecution, and civil liability even if no data is taken.
-
-### Acceptable Use
-
-- Authorized red-team physical engagements with a signed scope
-- Internal security audits of facilities you own or operate
-- Defensive hardening exercises with informed personnel
-- Academic study and laboratory testing on your own equipment
+- **CFAA (18 U.S.C. § 1030)**, trespass law, state/local burglary and criminal
+  trespass statutes, and **GDPR** where PII is involved.
 
 ### Prohibited Use
-
-- Entering or testing any facility without written authorization
-- Bypassing locks, doors, or badge readers on premises you do not control
-- Cloning real, in-use access badges outside an authorized engagement
-- Photographing or recording people without consent during exercises
-- Any use that violates applicable law or terms of service
+- Testing any facility without written authorization.
+- Bypassing locks, doors, or badge readers on premises you do not control.
+- Cloning real, in-use badges.
+- Photographing/recording people without consent during exercises.
 
 ### No Warranty
-
-This software is provided "as is" without warranty of any kind. The authors assume no liability for damages, injury, arrest, or loss arising from use or misuse of this tool.
+Provided "AS IS". Author accepts no liability for damages, injury, or arrest
+arising from misuse.
 
 ### Responsible Disclosure
+Report gaps to facility owners privately; never publish identifiers/ photographs
+that could enable a real attack.
 
-Report physical-security gaps to facility owners before public disclosure, and never publish photographs or identifiers that could enable a real attack.
+## Live Lab Test Plan
+
+1. `python3 physical_audit.py --lab-root ./lab --demo` → exit 0; validates the
+   bundled synthetic authorization record; writes MD + JSON reports.
+2. `python3 physical_audit.py --lab-root ./lab --plan --auth-json auth.json` →
+   generates a tailgating plan from a completed record.
+3. `python3 physical_audit.py --lab-root ./lab --inventory` → lists synthetic inventory.
+4. Negative: `--lab-root ./lab --target-org SomeCorp` exits non-zero; an incomplete
+   `--auth-json` is also rejected.
+5. `python -m unittest discover -s tests` → 13 offline tests pass.
+
+## Metrics
+
+- Authorization fields required: 8 (all mandatory).
+- Inventory: 4 synthetic assets/access points.
+- Tailgating checklist: 8 steps + 5 prohibited techniques.
+- Badge-check steps: 6 defensive procedures.
+- Test count: 13.
+
+## Usage
+
+```bash
+python3 physical_audit.py --lab-root ./lab --demo
+python3 physical_audit.py --lab-root ./lab --auth-json auth.json --plan
+python3 physical_audit.py --lab-root ./lab --checklist
+```
 
 ## License
 
-MIT License
+MIT
